@@ -80,8 +80,12 @@ WSGI_APPLICATION = 'Hlavny_projekt.wsgi.application'
 
 DATABASES = {#tu nie!!!
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': os.getenv('H_NAME'),
+        'USER': os.getenv('H_USER'),
+        'PASSWORD': os.getenv('H_PASS'),
+        'HOST': os.getenv('H_HOST'),
+        'PORT': os.getenv('H_PORT'),
     }
 }
 
