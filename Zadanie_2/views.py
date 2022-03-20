@@ -130,6 +130,6 @@ order by mpd.id ASC;""" % player_id)
                 "actions": array,
             }
             pole.append(match)
-        poc = poc + 1
+        poc = poc +  1
 
     return JsonResponse({"id": player_id, "player_nick": player_nick, "matches": pole})
