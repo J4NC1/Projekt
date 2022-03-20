@@ -78,7 +78,7 @@ WSGI_APPLICATION = 'Hlavny_projekt.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 
-DATABASES = {#tu nie!!!
+DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': os.getenv('H_NAME'),
