@@ -54,7 +54,7 @@ join matches as mch
     on mpd.match_id  = mch.id
 join heroes as hr
     on mpd.hero_id = hr.id
-    where pl.id = %s order by mch.id ASC"""% i_player_id)#moze byt aj %
+    where pl.id = %s order by mch.id ASC""", [i_player_id])#moze byt aj %
 
 
     player_nick = cursor.fetchall()
@@ -133,3 +133,63 @@ order by mpd.id ASC;""" % player_id)
         poc = poc +  1
 
     return JsonResponse({"id": player_id, "player_nick": player_nick, "matches": pole})
+
+
+
+
+
+@api_view(['GET'])
+def game_exp2(request, match_id):
+    conn4 = psycopg2.connect(
+        dbname=os.getenv('DB_NAME'),
+        user=os.getenv('AIS_LOG'),
+        password=os.getenv('AIS_PASS'),
+        host=os.getenv('HOST_Z2'),
+        port=os.getenv('PORT_Z2')
+    )
+
+    cursor = conn4.cursor()
+    cursor.execute("""select * from(
+select *, row_number() over(partition by hero_id) line_number from (
+select distinct  matches.id as match_id, heroes.id as hero_id, heroes.localized_name, count(purchase_logs.item_id) as number_of_purchase, items.name as item_name,purchase_logs.item_id as item_id
+from matches_players_details as mpd
+join matches
+on matches.id = mpd.match_id
+join heroes
+on heroes.id = mpd.hero_id
+join purchase_logs
+on mpd.id = purchase_logs.match_player_detail_id
+join items
+on items.id = purchase_logs.item_id
+where mpd.match_id = 21421 and (matches.radiant_win = true and mpd.player_slot>= 0 and mpd.player_slot<=4 or matches.radiant_win = false and mpd.player_slot>=128 and mpd.player_slot<=132)
+group by  heroes.localized_name,matches.id,heroes.id,mpd.player_slot,purchase_logs.item_id, items.name
+order by heroes.id ASC,number_of_purchase DESC,item_name ASC) as res
+
+group by  hero_id,match_id,item_id, item_name,res.localized_name, res.number_of_purchase
+order by hero_id ASC,number_of_purchase DESC,item_name ASC) as res2
+
+where line_number < 6
+group by  hero_id,match_id,item_id, item_name,res2.localized_name, res2.number_of_purchase, res2.line_number
+order by hero_id ASC,number_of_purchase DESC,item_name ASC;""", [match_id])
+    data = cursor.fetchall()
+    heroes = []
+    purchases = []
+    check = 1
+    for line in data:
+        purchases_2 = {
+            "id": line[2],
+            "name": line[3],
+            "count": line[4],
+        }
+        purchases.append(purchases_2)
+        if check == 5:
+            check = 0
+            heroe_2 = {
+                "id": line[0],
+                "name": line[1],
+                "top_purchases": purchases,
+            }
+            heroes.append(heroe_2)
+            purchases = []
+        check += 1
+    return JsonResponse({"id": match_id, "heroes": heroes})
