@@ -40,8 +40,8 @@ def game_exp(request, i_player_id):
         port=os.getenv('PORT_Z2')
     )
 
-    cursor = conn2.cursor()
-    cursor.execute("""select pl.id, COALESCE(pl.nick, 'unknown')as player_nick, hr.localized_name as hero_localized_name, ROUND((mch.duration::decimal)/60, 2) as match_duration_minutes, COALESCE(mpd.xp_hero,0) + COALESCE(mpd.xp_creep, 0) + COALESCE(mpd.xp_other, 0) + COALESCE(mpd.xp_roshan, 0) as experience_gained, mpd.level as level_gained, mpd.match_id,
+    cursor2 = conn2.cursor()
+    cursor2.execute("""select pl.id, COALESCE(pl.nick, 'unknown')as player_nick, hr.localized_name as hero_localized_name, ROUND((mch.duration::decimal)/60, 2) as match_duration_minutes, COALESCE(mpd.xp_hero,0) + COALESCE(mpd.xp_creep, 0) + COALESCE(mpd.xp_other, 0) + COALESCE(mpd.xp_roshan, 0) as experience_gained, mpd.level as level_gained, mpd.match_id,
 case
     when mch.radiant_win = true and mpd.player_slot>= 0 and mpd.player_slot<=4 then true
     when mch.radiant_win = false and mpd.player_slot>=128 and mpd.player_slot<=132 then true
@@ -57,7 +57,7 @@ join heroes as hr
     where pl.id = %s order by mch.id ASC""", [i_player_id])#moze byt aj %
 
 
-    player_nick = cursor.fetchall()
+    player_nick = cursor2.fetchall()
     pole = []
 
 
@@ -91,8 +91,8 @@ def game_objectives(request, player_id):
         port=os.getenv('PORT_Z2')
     )
 
-    cursor = conn3.cursor()
-    cursor.execute("""select pl.id as id, COALESCE(pl.nick, 'unknown')as player_nick, hr.localized_name as hero_localized_name,mpd.match_id,
+    cursor3 = conn3.cursor()
+    cursor3.execute("""select pl.id as id, COALESCE(pl.nick, 'unknown')as player_nick, hr.localized_name as hero_localized_name,mpd.match_id,
 (select distinct COALESCE(go.subtype, 'NO_ACTION')), coalesce(NULLIF(count(go.subtype),0),1)
 
 from matches_players_details as mpd
@@ -107,7 +107,7 @@ join players as pl
 where pl.id = %s group by pl.id, mpd.match_id, hr.localized_name, go.subtype, go.match_player_detail_id_1, mpd.id
 order by mpd.id ASC;""" % player_id)
 
-    game_obj = cursor.fetchall()
+    game_obj = cursor3.fetchall()
     array = []
     pole = []
     player_nick = ""
@@ -148,8 +148,8 @@ def game_exp2(request, match_id):
         port=os.getenv('PORT_Z2')
     )
 
-    cursor = conn4.cursor()
-    cursor.execute("""select * from(
+    cursor4 = conn4.cursor()
+    cursor4.execute("""select * from(
 select *, row_number() over(partition by hero_id) line_number from (
 select distinct  matches.id as match_id, heroes.id as hero_id, heroes.localized_name, count(purchase_logs.item_id) as number_of_purchase, items.name as item_name,purchase_logs.item_id as item_id
 from matches_players_details as mpd
@@ -171,7 +171,7 @@ order by hero_id ASC,number_of_purchase DESC,item_name ASC) as res2
 where line_number < 6
 group by  hero_id,match_id,item_id, item_name,res2.localized_name, res2.number_of_purchase, res2.line_number
 order by hero_id ASC,number_of_purchase DESC,item_name ASC;""", [match_id])
-    data = cursor.fetchall()
+    data = cursor4.fetchall()
     heroes = []
     purchases = []
     check = 1
