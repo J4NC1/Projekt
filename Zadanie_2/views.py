@@ -161,7 +161,7 @@ join purchase_logs
 on mpd.id = purchase_logs.match_player_detail_id
 join items
 on items.id = purchase_logs.item_id
-where mpd.match_id = 21421 and (matches.radiant_win = true and mpd.player_slot>= 0 and mpd.player_slot<=4 or matches.radiant_win = false and mpd.player_slot>=128 and mpd.player_slot<=132)
+where mpd.match_id = %s and (matches.radiant_win = true and mpd.player_slot>= 0 and mpd.player_slot<=4 or matches.radiant_win = false and mpd.player_slot>=128 and mpd.player_slot<=132)
 group by  heroes.localized_name,matches.id,heroes.id,mpd.player_slot,purchase_logs.item_id, items.name
 order by heroes.id ASC,number_of_purchase DESC,item_name ASC) as res
 
