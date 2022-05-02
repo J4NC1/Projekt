@@ -177,16 +177,16 @@ order by hero_id ASC,number_of_purchase DESC,item_name ASC;""", [match_id])
     check = 1
     for line in data:
         purchases_2 = {
-            "id": line[2],
-            "name": line[3],
-            "count": line[4],
+            "id": line[5],
+            "name": line[4],
+            "count": line[3],
         }
         purchases.append(purchases_2)
         if check == 5:
             check = 0
             heroe_2 = {
-                "id": line[0],
-                "name": line[1],
+                "id": line[1],
+                "name": line[2],
                 "top_purchases": purchases,
             }
             heroes.append(heroe_2)
